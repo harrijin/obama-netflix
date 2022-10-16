@@ -99,9 +99,9 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
     res = []
     for i in range(len(form_data)):
         task_data = form_data[i]
-        allowed_days = [j for j in range(len(task_data['Allowed Days'])) if task_data['Allowed Days'][j]]
-        start_time = task_data['Start Time'] # minutes past midnight
-        end_time = task_data['End Time'] # minutes past midnight
+        allowed_days = [j for j in range(len(task_data['dayConstraints'])) if task_data['dayConstraints'][j]]
+        start_time = task_data['timeConstraints'][0] # minutes past midnight
+        end_time = task_data['timeConstraints'][1] # minutes past midnight
         allowed_times = (
             datetime.time(
                 hour=(start_time // 60),
@@ -118,11 +118,11 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
             # Cloudy
             # Fog
             # Snow
-            WeatherCondition.SUNNY: task_data['Weather Constraints'][0],
-            WeatherCondition.RAIN: task_data['Weather Constraints'][1],
-            WeatherCondition.CLOUDY: task_data['Weather Constraints'][2],
-            WeatherCondition.FOG: task_data['Weather Constraints'][3],
-            WeatherCondition.SNOW: task_data['Weather Constraints'][4],
+            WeatherCondition.SUNNY: task_data['weather'][0],
+            WeatherCondition.RAIN: task_data['weather'][1],
+            WeatherCondition.CLOUDY: task_data['weather'][2],
+            WeatherCondition.FOG: task_data['weather'][3],
+            WeatherCondition.SNOW: task_data['weather'][4],
         }
         allowed_weather = [weather_cond for weather_cond, allowed in weather_constraints.items() if allowed]
         modified_allowed_times = modify_allowed_times(
@@ -131,10 +131,11 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
             allowed_weather,
             zip_code
         )
-        duration = datetime.timedelta(minutes=task_data['Duration'])
+        duration = datetime.timedelta(minutes=task_data['duration'])
         res.append(
             Task(
-                name=task_data['Task Name'],
+                name=task_data['name'],
+                description=task_data['description'],
                 task_id=i,
                 duration=duration,
                 prerequisites=task_data['Prerequisites'],
