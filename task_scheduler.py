@@ -42,15 +42,10 @@ def get_time_slots(tasks1):
         task_name = task_tuple[0]
         task_duration = task_tuple[1]
         task_weekday_dict = task_tuple[2]
-        # print('\ntask_name:', task_name)
-        # print('task_duration:', task_duration)
-        # print('task_weekday_dict:', task_weekday_dict)
 
         # weekdays and their time intervals
         for day, day_intervals_array in task_weekday_dict.items():
             # all task intervals for the day
-            # print('day:', day)
-            # print('day_intervals_array:', day_intervals_array)
             for task_endpts in day_intervals_array:
                 weekday_offset = 24 * 60 * weekday_offset_dict[day]
                 start_military = task_endpts[0].hour * \
@@ -58,27 +53,25 @@ def get_time_slots(tasks1):
                 end_military = task_endpts[1].hour * 60 + task_endpts[1].minute
                 task_start = start_military + weekday_offset
                 task_end = end_military + weekday_offset
-                # print("stuff", task_start, task_end, task_duration)
                 # add all potential task durations
                 for start in range(task_start, task_end-task_duration+30, 30):
                     time_slots.append(
                         time_slot(start, start+task_duration, task_name))
-                    # print('appended')
     return time_slots
 
 
-time_slots = get_time_slots(tasks)
 # sort time slots
-
-
+time_slots = get_time_slots(tasks)
 time_slots = sorted(time_slots, key=lambda x: (x.end, x.start))
 
-print('all blocks')
-for slot in time_slots:
-    print(slot.task, ': ', slot.start, '-', slot.end)
 
-# def sort_function:
-#     # TODO
+def print_scheduled(tasks):
+    for task in tasks:
+        print(task.task, task.start, '-', task.end)
+
+
+print('all blocks')
+print_scheduled(time_slots)
 
 scheduled_tasks = []
 
@@ -104,19 +97,7 @@ def interval_schedule(time_slots):
 
 
 task_counts = interval_schedule(time_slots)
-
 print('task_counts', task_counts, '\n')
-
-# print('scheduled blocks:')
-# for task in scheduled_tasks:
-#     print(task.task, task.start, '-', task.end)
-# print()
-
-
-def print_scheduled(tasks):
-    print('scheduled blocks:')
-    for task in tasks:
-        print(task.task, task.start, '-', task.end)
 
 
 unscheduled_tasks = tasks
