@@ -1,8 +1,37 @@
 
+from task import Task
 import datetime as dt
 # import secrets
 # from multiprocessing.reduction import duplicate
 # import sched
+
+tasks1 = [
+    Task(
+        name='A',
+        description='dn',
+        task_id=0,
+        duration=dt.timedelta(minutes=60),
+        prerequisites=[],
+        allowed_times={
+            2: [
+                (dt.time(1), dt.time(3))
+            ]
+        }
+    ),
+    #  ('B', 90, {'Thu': [(dt.time(1, 30), dt.time(3))]}),
+    Task(
+        name='C',
+        description='dn',
+        task_id=1,
+        duration=dt.timedelta(minutes=30),
+        prerequisites=[],
+        allowed_times={
+            2: [
+                (dt.time(2, 30), dt.time(3))
+            ]
+        }
+    ),
+]
 
 tasks1 = [('A', 60, {'Tue': [(dt.time(1), dt.time(3))]}),  # A 1hr Wed 1-2
           #  ('B', 90, {'Thu': [(dt.time(1, 30), dt.time(3))]}),
