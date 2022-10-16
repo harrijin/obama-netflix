@@ -11,20 +11,29 @@ tasks1 = [
         name='A',
         description='dn',
         task_id=0,
-        duration=dt.timedelta(minutes=60),
+        duration=dt.timedelta(minutes=30),
         prerequisites=[],
         allowed_times={
+            0: [
+                (dt.time(2), dt.time(3))
+            ],
+            1: [
+                (dt.time(2), dt.time(3))
+            ],
             2: [
-                (dt.time(1), dt.time(3))
+                (dt.time(2), dt.time(3))
             ],
             3: [
-                (dt.time(1), dt.time(3))
+                (dt.time(2), dt.time(3))
             ],
             4: [
-                (dt.time(1), dt.time(3))
+                (dt.time(2), dt.time(3))
             ],
             5: [
-                (dt.time(1), dt.time(3))
+                (dt.time(2), dt.time(3))
+            ],
+            6: [
+                (dt.time(2), dt.time(3))
             ]
         }
     ),
@@ -33,11 +42,11 @@ tasks1 = [
         name='C',
         description='dn',
         task_id=1,
-        duration=dt.timedelta(minutes=90),
+        duration=dt.timedelta(minutes=60),
         prerequisites=[],
         allowed_times={
-            2: [
-                (dt.time(1, 30), dt.time(3))
+            0: [
+                (dt.time(2), dt.time(3))
             ]
         }
     ),
@@ -252,4 +261,4 @@ def schedule_tasks(tasks):
     #     print(t.scheduled_time)
     return tasks
 
-schedule_tasks(tasks)
+# schedule_tasks(tasks)
