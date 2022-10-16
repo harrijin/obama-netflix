@@ -15,6 +15,15 @@ tasks1 = [
         allowed_times={
             2: [
                 (dt.time(1), dt.time(3))
+            ],
+            3: [
+                (dt.time(1), dt.time(3))
+            ],
+            4: [
+                (dt.time(1), dt.time(3))
+            ],
+            5: [
+                (dt.time(1), dt.time(3))
             ]
         }
     ),
@@ -26,7 +35,7 @@ tasks1 = [
         duration=dt.timedelta(minutes=30),
         prerequisites=[],
         allowed_times={
-            2: [
+            6: [
                 (dt.time(2, 30), dt.time(3))
             ]
         }
@@ -114,19 +123,24 @@ def schedule_tasks(tasks):
 
         return task_counts
 
-
     # get counts of scheduled tasks
     task_counts = interval_schedule(time_slots)
     # print('task_counts', task_counts, '\n')
+    print(len(scheduled_tasks), 'b')
 
+    # print(task_counts)
 
     unscheduled_tasks = copy.deepcopy(tasks)
+    print('a', len(unscheduled_tasks))
+
     for task in unscheduled_tasks:
         task_name = task.name
         if task_name in task_counts:
             unscheduled_tasks.remove(task)
     # print('unscheduled_tasks:', unscheduled_tasks)
-
+    print('unsch')
+    
+    print('b',len(unscheduled_tasks))
 
     duplicate_tasks = []
     for task_name, count in task_counts.items():
@@ -142,14 +156,24 @@ def schedule_tasks(tasks):
     for dupe_task in duplicate_tasks:
         for unscheduled_block in unscheduled_tasks_slots:
             if unscheduled_block.start >= dupe_task.start and unscheduled_block.end <= dupe_task.end:
+                print('b4', len(scheduled_tasks))
                 scheduled_tasks.remove(dupe_task)
+                print('after', len(scheduled_tasks))
                 task_counts[dupe_task.task] -= 1
+                print(task_counts, 'asdflkajsdfkajsdklfjasf')
                 scheduled_tasks.append(unscheduled_block)
-                task_counts[unscheduled_block.task] = 1
+                if unscheduled_block.task not in task_counts:
+                    task_counts[unscheduled_block.task] = 1
+                else:
+                    task_counts[unscheduled_block.task] += 1
+                print(task_counts, 'asdfsdf')
+
                 break
 
+    print('1st', task_counts)
     # second pass - remove all duplicate tasks
     remove_tasks = []
+    scheduled_tasks.reverse()
     for task in scheduled_tasks:
         if task_counts[task.task] > 1:
             remove_tasks.append(task)
@@ -157,11 +181,13 @@ def schedule_tasks(tasks):
     for rm_task in remove_tasks:
         scheduled_tasks.remove(rm_task)
 
-
+    print(task_counts)
     # print('final scheduled blocks:')
     # print_scheduled(scheduled_tasks)
 
     # print('len scheudled', len(scheduled_tasks))
+
+    scheduled_tasks.reverse()
 
     for task in scheduled_tasks:
         task_name = task.task
@@ -183,8 +209,10 @@ def schedule_tasks(tasks):
         print(task_name)
         print(task_id, tasks[task_id].scheduled_time)
 
+        # print(len(scheduled_tasks))
     # for t in tasks:
     #     print(t.name)
     #     print(t.scheduled_time)
     return tasks
 
+schedule_tasks(tasks)
