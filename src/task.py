@@ -42,7 +42,7 @@ class Task:
         self.prerequisites = prerequisites
         self.allowed_times = allowed_times
 
-    def to_json(self):    
+    def to_json(self):
         start_time = self.scheduled_time[1]
         start_timedelta = datetime.timedelta(hours=start_time.hour, minutes=start_time.minute, seconds=start_time.second)
         return {
@@ -100,8 +100,12 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
     for i in range(len(form_data)):
         task_data = form_data[i]
         allowed_days = [j for j in range(len(task_data['dayConstraints'])) if task_data['dayConstraints'][j]]
-        start_time = task_data['timeConstraints'][0] # minutes past midnight
-        end_time = task_data['timeConstraints'][1] # minutes past midnight
+        if not task_data['timeConstraints'][0]:
+            start_time = 0
+            end_time = 24*60 - 1
+        else:
+            start_time = task_data['timeConstraints'][0] # minutes past midnight
+            end_time = task_data['timeConstraints'][1] # minutes past midnight
         allowed_times = (
             datetime.time(
                 hour=(start_time // 60),
