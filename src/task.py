@@ -1,3 +1,4 @@
+import json
 import datetime
 from typing import Any, Dict, List, Tuple
 
@@ -40,6 +41,19 @@ class Task:
         self.duration = duration
         self.prerequisites = prerequisites
         self.allowed_times = allowed_times
+
+    def to_json(self):    
+        start_time = self.scheduled_time[1]
+        start_timedelta = datetime.timedelta(hours=start_time.hour, minutes=start_time.minute, seconds=start_time.second)
+        return {
+            "name" : self.name,
+            "description" : self.description,
+            "task_id" : self.task_id,
+            "duration" : int(self.duration.total_seconds()/60),
+            "prequisites" : self.prerequisites,
+            "start_time" : (self.scheduled_time[0], int(start_timedelta.total_seconds()/60)),
+        }
+
         
 def modify_allowed_times(
     allowed_days: List[int],
@@ -87,13 +101,29 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
     for i in range(len(form_data)):
         task_data = form_data[i]
         allowed_days = [j for j in range(len(task_data['Allowed Days'])) if task_data['Allowed Days'][j]]
-        allowed_times = (datetime.time(task_data['Start Time']), datetime.time(task_data['End Time']))
+        start_time = task_data['Start Time'] # minutes past midnight
+        end_time = task_data['End Time'] # minutes past midnight
+        allowed_times = (
+            datetime.time(
+                hour=(start_time // 60),
+                minute=(start_time % 60)
+            ),
+            datetime.time(
+                hour=(end_time // 60),
+                minute=(end_time % 60)
+            )
+        )
         weather_constraints = {
-            WeatherCondition.SUNNY: task_data['Weather Constraints']['Sunny'],
-            WeatherCondition.CLOUDY: task_data['Weather Constraints']['Cloudy'],
-            WeatherCondition.FOG: task_data['Weather Constraints']['Fog'],
-            WeatherCondition.RAIN: task_data['Weather Constraints']['Rain'],
-            WeatherCondition.SNOW: task_data['Weather Constraints']['Snow'],
+            # Sunny
+            # Rainy
+            # Cloudy
+            # Fog
+            # Snow
+            WeatherCondition.SUNNY: task_data['Weather Constraints'][0],
+            WeatherCondition.RAIN: task_data['Weather Constraints'][1],
+            WeatherCondition.CLOUDY: task_data['Weather Constraints'][2],
+            WeatherCondition.FOG: task_data['Weather Constraints'][3],
+            WeatherCondition.SNOW: task_data['Weather Constraints'][4],
         }
         allowed_weather = [weather_cond for weather_cond, allowed in weather_constraints.items() if allowed]
         modified_allowed_times = modify_allowed_times(
@@ -102,11 +132,12 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
             allowed_weather,
             zip_code
         )
+        duration = datetime.timedelta(minutes=task_data['Duration'])
         res.append(
             Task(
                 name=task_data['Task Name'],
                 task_id=i,
-                duration=task_data['Duration'],
+                duration=duration,
                 prerequisites=task_data['Prerequisites'],
                 allowed_times=modified_allowed_times,
             )
