@@ -117,14 +117,6 @@ for task_name, count in task_counts.items():
                 duplicate_tasks.append(task)
 
 
-def no_duplicates(task_counts):
-    for task_name, counts in task_counts.items():
-        if counts > 1:
-            return True
-
-    return False
-
-
 unscheduled_tasks_slots = get_time_slots(unscheduled_tasks)
 
 # first pass - switch in unscheduled tasks
