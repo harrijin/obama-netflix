@@ -11,6 +11,7 @@ class Task:
     prerequisites: List[int] # List of task_ids
     # Allowlist of times + days this task can be done
     allowed_times: Dict[int, List[Tuple[datetime.time, datetime.time]]] # {day: [(start_time, end_time)]}
+    scheduled_time: Tuple[int, datetime.time, int, datetime.time] # (day_of_week, start, day_of_week, end) (0 == Sunday)
     
     def __init__(
         self,

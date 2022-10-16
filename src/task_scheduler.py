@@ -1,3 +1,4 @@
+import copy
 from task import Task
 import datetime as dt
 # import secrets
@@ -49,10 +50,12 @@ tasks = tasks1
 
 
 class time_slot:
-    def __init__(self, start, end, task):
+    def __init__(self, start, end, task, t_id):
         self.start = start
         self.end = end
         self.task = task  # string
+        # self.index = index
+        self.t_id = t_id
 
 
 time_slots = []  # all tasks’ time slots
@@ -72,7 +75,9 @@ def get_time_slots(tasks):
     time_slots = []
     for task_class in tasks:
         task_name = task_class.name
-        task_duration = task_class.duration.minutes
+        task_id = task_class.task_id
+        # task_index = task_idx
+        task_duration = int(task_class.duration.total_seconds()/60)
         task_weekday_dict = task_class.allowed_times
 
         # weekdays and their time intervals
@@ -88,7 +93,7 @@ def get_time_slots(tasks):
                 # add all potential task durations
                 for start in range(task_start, task_end-task_duration+5, 5):
                     time_slots.append(
-                        time_slot(start, start+task_duration, task_name))
+                        time_slot(start, start+task_duration, task_name, task_id))
     return time_slots
 
 
@@ -133,9 +138,9 @@ task_counts = interval_schedule(time_slots)
 print('task_counts', task_counts, '\n')
 
 
-unscheduled_tasks = tasks
-for task in tasks:
-    task_name = task[0]
+unscheduled_tasks = copy.deepcopy(tasks)
+for task in unscheduled_tasks:
+    task_name = task.name
     if task_name in task_counts:
         unscheduled_tasks.remove(task)
 print('unscheduled_tasks:', unscheduled_tasks)
@@ -173,3 +178,30 @@ for rm_task in remove_tasks:
 
 print('final scheduled blocks:')
 print_scheduled(scheduled_tasks)
+
+print('len scheudled', len(scheduled_tasks))
+
+for task in scheduled_tasks:
+    task_name = task.task
+    military_start = task.start
+    military_end = task.end
+
+    start_day = military_start // (24 * 60) 
+    end_day = military_end // (24 * 60) 
+    
+    start_hour = ( military_start % (24 * 60) ) // 60
+    start_minute = ( military_start % (24 * 60) ) % 60
+
+    end_hour = ( military_end % (24 * 60) ) // 60
+    end_minute = ( military_end % (24 * 60) ) % 60
+
+    task_id = task.t_id
+
+    tasks[task_id].scheduled_time = (start_day, dt.time(start_hour, start_minute), end_day, dt.time(end_hour, end_minute))
+    print(task_name)
+    print(task_id, tasks[task_id].scheduled_time)
+
+for t in tasks:
+    print(t.name)
+    print(t.scheduled_time)
+
