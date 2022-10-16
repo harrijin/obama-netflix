@@ -50,7 +50,6 @@ class Task:
             "description" : self.description,
             "task_id" : self.task_id,
             "duration" : int(self.duration.total_seconds()/60),
-            "prequisites" : self.prerequisites,
             "start_time" : (self.scheduled_time[0], int(start_timedelta.total_seconds()/60)),
         }
 
