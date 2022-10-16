@@ -54,7 +54,7 @@ def get_time_slots(tasks1):
                 task_start = start_military + weekday_offset
                 task_end = end_military + weekday_offset
                 # add all potential task durations
-                for start in range(task_start, task_end-task_duration+30, 30):
+                for start in range(task_start, task_end-task_duration+5, 5):
                     time_slots.append(
                         time_slot(start, start+task_duration, task_name))
     return time_slots
@@ -96,6 +96,7 @@ def interval_schedule(time_slots):
     return task_counts
 
 
+# get counts of scheduled tasks
 task_counts = interval_schedule(time_slots)
 print('task_counts', task_counts, '\n')
 
@@ -105,7 +106,6 @@ for task in tasks:
     task_name = task[0]
     if task_name in task_counts:
         unscheduled_tasks.remove(task)
-
 print('unscheduled_tasks:', unscheduled_tasks)
 
 
@@ -116,10 +116,6 @@ for task_name, count in task_counts.items():
             if task.task == task_name:
                 duplicate_tasks.append(task)
 
-# print('duplicate_tasks', duplicate_tasks)
-# print('my dup')
-# print_scheduled(duplicate_tasks)
-
 
 def no_duplicates(task_counts):
     for task_name, counts in task_counts.items():
@@ -129,48 +125,27 @@ def no_duplicates(task_counts):
     return False
 
 
-# print('no_duplicates', no_duplicates(task_counts))
-
 unscheduled_tasks_slots = get_time_slots(unscheduled_tasks)
 
-second_break = False
-final_task_reached = False
-one_pass = True
-while one_pass:
-    one_pass = False
-    # print('oh no dup', task_counts)
-    for dupe_task in duplicate_tasks:
-        for unscheduled_block in unscheduled_tasks_slots:
-            if unscheduled_block.start >= dupe_task.start and unscheduled_block.end <= dupe_task.end:
+# first pass - switch in unscheduled tasks
+for dupe_task in duplicate_tasks:
+    for unscheduled_block in unscheduled_tasks_slots:
+        if unscheduled_block.start >= dupe_task.start and unscheduled_block.end <= dupe_task.end:
+            scheduled_tasks.remove(dupe_task)
+            task_counts[dupe_task.task] -= 1
+            scheduled_tasks.append(unscheduled_block)
+            task_counts[unscheduled_block.task] = 1
+            break
 
-                scheduled_tasks.remove(dupe_task)
-                task_counts[dupe_task.task] -= 1
-                scheduled_tasks.append(unscheduled_block)
-                task_counts[unscheduled_block.task] = 1
-                # print('break')
-                break
-            if dupe_task == duplicate_tasks[-1]:
-                final_task_reached = True
-
-# print_scheduled(duplicate_tasks)
-
+# second pass - remove all duplicate tasks
 remove_tasks = []
 for task in scheduled_tasks:
     if task_counts[task.task] > 1:
         remove_tasks.append(task)
         task_counts[task.task] -= 1
-# print_scheduled(remove_tasks)
-
 for rm_task in remove_tasks:
     scheduled_tasks.remove(rm_task)
 
 
-print('scheduled blocks:')
-for task in scheduled_tasks:
-    print(task.task, task.start, '-', task.end)
-print()
-# print(task_counts)
-
-# times_slots = sorted(times_slots, key=itemgetter('end', 'start'))
-
-# interval scheduling
+print('final scheduled blocks:')
+print_scheduled(scheduled_tasks)
