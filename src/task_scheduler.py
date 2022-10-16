@@ -1,6 +1,7 @@
 import copy
 from task import Task
 import datetime as dt
+import math
 # import secrets
 # from multiprocessing.reduction import duplicate
 # import sched
@@ -32,11 +33,11 @@ tasks1 = [
         name='C',
         description='dn',
         task_id=1,
-        duration=dt.timedelta(minutes=30),
+        duration=dt.timedelta(minutes=90),
         prerequisites=[],
         allowed_times={
-            6: [
-                (dt.time(2, 30), dt.time(3))
+            2: [
+                (dt.time(1, 30), dt.time(3))
             ]
         }
     ),
@@ -148,18 +149,54 @@ def schedule_tasks(tasks):
             for task in scheduled_tasks:
                 if task.task == task_name:
                     duplicate_tasks.append(task)
+    
+    # TODO: consolidate duplicate tasks by name
 
 
     unscheduled_tasks_slots = get_time_slots(unscheduled_tasks)
+    print(len(unscheduled_tasks_slots), 'len of un')
 
+    print('dup tasks')
+    print_scheduled(duplicate_tasks)
+    print('unsched')
+    print_scheduled(unscheduled_tasks_slots)
     # first pass - switch in unscheduled tasks
     for dupe_task in duplicate_tasks:
         for unscheduled_block in unscheduled_tasks_slots:
-            if unscheduled_block.start >= dupe_task.start and unscheduled_block.end <= dupe_task.end:
+            span = []
+            unscheduled_block_duration = unscheduled_block.end - unscheduled_block.start
+            dupe_task_duration = dupe_task.end - dupe_task.start
+            num_dupe_needed = math.ceil(unscheduled_block_duration / dupe_task_duration)
+            
+            print('num_dupe_needed', num_dupe_needed)
+            num_dupes_found = 1
+            dupes_found = [dupe_task]
+            print('dupe_task.start', dupe_task.start)
+            dupe_start = dupe_task.end
+            terminate = True
+            print('dupe_start', dupe_start)
+            while num_dupes_found < num_dupe_needed:
+                for other_dupe in duplicate_tasks:
+                    print('other_dupe.start', other_dupe.start)
+                    if other_dupe.start == dupe_start:
+                        print("went here")
+                        num_dupes_found += 1
+                        dupe_start = dupe_start + dupe_task_duration
+                        dupes_found.append(other_dupe)
+                        terminate == False
+
+                    
+                if terminate:
+                    break
+
+            
+            if unscheduled_block.start >= dupe_task.start and num_dupes_found == num_dupe_needed:
                 print('b4', len(scheduled_tasks))
-                scheduled_tasks.remove(dupe_task)
+                for d in dupes_found:
+                    print('remove d ', d.start, d.end)
+                    scheduled_tasks.remove(d)
                 print('after', len(scheduled_tasks))
-                task_counts[dupe_task.task] -= 1
+                task_counts[dupe_task.task] -= num_dupe_needed
                 print(task_counts, 'asdflkajsdfkajsdklfjasf')
                 scheduled_tasks.append(unscheduled_block)
                 if unscheduled_block.task not in task_counts:
