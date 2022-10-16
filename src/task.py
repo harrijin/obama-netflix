@@ -68,15 +68,15 @@ def modify_allowed_times(
     forecast = WeatherForecast(zip_code)
     start_time = allowed_times[0]
     end_time = allowed_times[1]
-    one_hour = datetime.time(1)
+    one_hour = datetime.timedelta(hours=1)
     for day in allowed_days:
         # Check weather in provided time interval
         l = start_time
         while l < end_time:
             r = l + one_hour
-            while (forecast.check_weather(r) in allowed_weather) and (r < end_time):
+            while (r < end_time) and (forecast.check_weather(r) in allowed_weather):
                 r += one_hour
-            res[day] = (l, r)
+            res[day].append((l, r))
             while (l < end_time) and (forecast.check_weather(l) not in allowed_weather):
                 l += one_hour
     return res
