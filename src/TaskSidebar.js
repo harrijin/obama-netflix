@@ -7,7 +7,7 @@ import Dropdown from "react-bootstrap/Dropdown";
 
 import { useState } from "react";
 
-export default function TaskSidebar() {
+export default function TaskSidebar({handleScheduleUpdate}) {
   const [tasks, setTasks] = useState([]);
 
   const [isShowingForm, setShowingForm] = useState(false);
@@ -34,6 +34,27 @@ export default function TaskSidebar() {
 
   const [zip, setZip] = useState("");
 
+  const handleSubmit = async () => {
+    const payload = {zip: zip, tasks: tasks}
+    console.log(JSON.stringify(payload));
+    const response = await fetch(
+      "http://localhost:5000/send_tasks",
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        mode: 'cors'
+      }
+    );
+    response.json().then((result) => {
+      console.log(result);
+      handleScheduleUpdate(result);
+    })
+  }
+
   return (
     <Card body style={{ height: "100%" }}>
       {!isShowingForm && (
@@ -43,7 +64,7 @@ export default function TaskSidebar() {
               <Accordion.Item eventKey={i}>
                 <Accordion.Header>{task.name}</Accordion.Header>
                 <Accordion.Body>
-                  <i>{task.duration + " hours"}</i>
+                  <i>{task.duration / 60 + " hours"}</i>
                   <br />
                   {task.description}
                 </Accordion.Body>
@@ -78,7 +99,7 @@ export default function TaskSidebar() {
             disabled={
               tasks.length <= 0 || !zip || zip.trim() == "" || zip.length < 5
             }
-            onClick={() => console.log(tasks)}
+            onClick={() => handleSubmit()}
           >
             Generate Schedule
           </Button>
@@ -105,7 +126,7 @@ export default function TaskSidebar() {
             </b>
             <Form.Control
               onChange={(e) =>
-                setFormInput({ ...formInput, duration: Number(e.target.value) })
+                setFormInput({ ...formInput, duration: Number(e.target.value) * 60 })
               }
               required
               type="number"
