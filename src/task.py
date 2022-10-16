@@ -10,7 +10,7 @@ class Task:
     duration: datetime.timedelta
     prerequisites: List[int] # List of task_ids
     # Allowlist of times + days this task can be done
-    allowed_times: Dict[int, List[Tuple[datetime.time, datetime.time]]] # (start_time, end_time)
+    allowed_times: Dict[int, List[Tuple[datetime.time, datetime.time]]] # {day: [(start_time, end_time)]}
     
     def __init__(
         self,
@@ -68,14 +68,18 @@ def modify_allowed_times(
         pass
     return res
 
-def task_factory(form_data: List[Dict[str, Any]], zip_code) -> List[Task]:
+def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
     res = []
     for i in range(len(form_data)):
         task_data = form_data[i]
-        allowed_days = [i for i in range(len(task_data['Allowed Days'])) if task_data['Allowed Days'][i]]
+        allowed_days = [j for j in range(len(task_data['Allowed Days'])) if task_data['Allowed Days'][j]]
         allowed_times = (datetime.time(task_data['Start Time']), datetime.time(task_data['End Time']))
         weather_constraints = {
-            WeatherCondition.SUNNY: task_data['Weather Constraints']['Sunny']
+            WeatherCondition.SUNNY: task_data['Weather Constraints']['Sunny'],
+            WeatherCondition.CLOUDY: task_data['Weather Constraints']['Cloudy'],
+            WeatherCondition.FOG: task_data['Weather Constraints']['Fog'],
+            WeatherCondition.RAIN: task_data['Weather Constraints']['Rain'],
+            WeatherCondition.SNOW: task_data['Weather Constraints']['Snow'],
         }
         
         modified_allowed_times = modify_allowed_times(
@@ -89,6 +93,8 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code) -> List[Task]:
                 name=task_data['Task Name'],
                 task_id=i,
                 duration=task_data['Duration'],
-                prerequisites=task_data
+                prerequisites=task_data['Prerequisites'],
+                allowed_times=modified_allowed_times,
             )
         )
+    return res
