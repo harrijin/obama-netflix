@@ -74,7 +74,7 @@ def modify_allowed_times(
     # if everything in weather constraints is True (i.e. no weather constraints), just return it without querying weather API
     if len(allowed_weather) == 5:
         return {
-            i: allowed_times for i in range(7)
+            i: [allowed_times] for i in range(7)
         }
     res = {
         j: [] for j in range(7)
@@ -138,7 +138,7 @@ def task_factory(form_data: List[Dict[str, Any]], zip_code: str) -> List[Task]:
                 description=task_data['description'],
                 task_id=i,
                 duration=duration,
-                prerequisites=task_data['Prerequisites'],
+                prerequisites=[],
                 allowed_times=modified_allowed_times,
             )
         )
